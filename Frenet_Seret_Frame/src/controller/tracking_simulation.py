@@ -1,23 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import imageio
+import imageio.v2 as imageio
 from config import GlobalConfig
 from ilqr_maths_main import run_ilqr
-from cubic_spline_planner import Spline2D
 import pdb
 config_ = GlobalConfig()
+
+from pathlib import Path
+import sys
+
+project_root = Path(__file__).resolve().parent.parent
+utils_path = project_root / 'utils'
+sys.path.insert(0, str(utils_path))
+
+from cubic_spline_planner import CubicSpline2D
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+
+# Navigate up to the project root
+project_root = script_dir.parent
+
+# Build the path to the 'data' directory and the CSV file
+data_path = project_root / 'data' / 'eight_shaped_road.csv'
+
+# Debugging: Print paths to verify
+# print(f"Script directory: {script_dir}")
+# print(f"Project root: {project_root}")
+# print(f"Data path: {data_path}")
+
+# Check if the file exists
+if not data_path.exists():
+    raise FileNotFoundError(f"File not found: {data_path}")
 
 def sigmoid(z):
     return 1/(1+ np.exp(-z))
 import pandas as pd
 def main():
     # Load waypoints from CSV file
-    df = pd.read_csv('/Users/rk/Documents/Github/Frennet_Frame/utils/eight_shaped_road.csv')
+    df = pd.read_csv(data_path)
     x = df['x'].values
     y = df['y'].values
     
     N = 600  # Total number of waypoints from the cubic spline planner
-    sp = Spline2D(x, y)
+    sp = CubicSpline2D(x, y)
     Total_Arc_length = sp.s[-1]
     Piecewise_arc_length = Total_Arc_length / N
     s = np.arange(0, sp.s[-1], Piecewise_arc_length)
@@ -103,7 +129,8 @@ def main():
     plt.close()
 
     # Create a GIF from the saved frames
-    with imageio.get_writer('simulation.gif', mode='I', duration=0.1) as writer:
+    data_path_sim = project_root / 'data' / 'simulation.gif'
+    with imageio.get_writer(data_path_sim, mode='I', duration=0.1) as writer:
         for i in range(frame_count):
             image = imageio.imread(f'frames/frame_{i:03d}.png')
             writer.append_data(image)

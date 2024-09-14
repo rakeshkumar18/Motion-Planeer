@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+from pathlib import Path
 
 class EightShapedRoad:
     def __init__(self, a=12, b=6, road_half_width=0.5):
@@ -103,6 +105,19 @@ class EightShapedRoad:
 # test
 road = EightShapedRoad(a=40, b=80, road_half_width=0.5)
 road.road_plots()
-road.export_data('eight_shaped_road.csv')
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+print(f"Script directory: {script_dir}")
+
+# Navigate up to the project root
+project_root = script_dir.parent
+print(f"Project root: {project_root}")
+
+# Build the path to the 'data' directory
+data_dir = project_root  / 'data'
+print(f"Data directory: {data_dir}")
+
+road.export_data(data_dir/'eight_shaped_road.csv')
 
 

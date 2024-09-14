@@ -1,6 +1,34 @@
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
+
+from pathlib import Path
+import sys
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+
+# Navigate up to the project root
+project_root = script_dir.parent
+
+# Build the path to the 'data' directory and the CSV file
+data_path_cart = project_root / 'data' / 'eight_shaped_road.csv'
+data_path_frenet = project_root / 'data' / 'frenet_frame_without_obstacle.csv'
+
+# Debugging: Print paths to verify
+# print(f"Script directory: {script_dir}")
+# print(f"Project root: {project_root}")
+# print(f"Data path: {data_path}")
+
+# Check if the file exists
+if not data_path_cart.exists():
+    raise FileNotFoundError(f"File not found: {data_path_cart}")
+
+# way points from data folder eight_shaped_road.csv
+df_cart = pd.read_csv(data_path_cart)
+df_frenet = pd.read_csv(data_path_frenet)
+
 
 class CubicSpline2D:
     def __init__(self, x, y):
@@ -76,11 +104,9 @@ class FrenetConverter:
 
         return x, y
 
-import pandas as pd
-# Define a circular reference path
-df = pd.read_csv('utils/eight_shaped_road.csv')
-reference_x = df['x'].values
-reference_y = df['y'].values
+# Reference path
+reference_x = df_cart['x'].values
+reference_y = df_cart['y'].values
 
 # Initialize the FrenetConverter with the reference path
 converter = FrenetConverter(reference_x, reference_y)
@@ -99,9 +125,8 @@ converter = FrenetConverter(reference_x, reference_y)
 
 # frenet_points = [converter.cartesian_to_frenet(x, y) for x, y in cartesian_points]
 
-df = pd.read_csv('frenet_frame_without_obstacle.csv')
-s = df['s'].values
-d = df['d'].values
+s = df_frenet['f_waypoints_s'].values
+d = df_frenet['f_waypoints_d'].values
 frenet_points = [(s[i], d[i]) for i in range(len(s))]
 
 reconverted_points = [converter.frenet_to_cartesian(s, d) for s, d in frenet_points]
@@ -119,12 +144,6 @@ plt.plot(reference_x, reference_y, 'g--', label='Reference Path')
 # Plot the reconverted Cartesian points
 reconverted_points = np.array(reconverted_points)
 plt.scatter(reconverted_points[:, 0], reconverted_points[:, 1], color='red', marker='x', label='Reconverted Cartesian Points')
-
-# Annotations
-# for i, (x, y) in enumerate(cartesian_points):
-#     plt.text(x + 0.2, y, f'P{i+1}', fontsize=12)
-# for i, (x, y) in enumerate(reconverted_points):
-#     plt.text(x + 0.2, y, f'R{i+1}', fontsize=12)
 
 # Formatting the plot
 plt.title('Frenet to Cartesian')

@@ -1,11 +1,46 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import imageio.v2 as imageio
+from io import BytesIO
 import copy
 import math
-from utils.cubic_spline_planner import CubicSpline2D
-from utils.quintic_quartic_polynomials_planner import quintic_polynomial, quartic_polynomial
+
+from pathlib import Path
+import sys
+
+project_root = Path(__file__).resolve().parent.parent
+utils_path = project_root / 'utils'
+sys.path.insert(0, str(utils_path))
+
+from cubic_spline_planner import CubicSpline2D
+from quintic_quartic_polynomials_planner import quintic_polynomial, quartic_polynomial
+
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+
+# Navigate up to the project root
+project_root = script_dir.parent
+
+# Build the path to the 'data' directory and the CSV file
+data_path = project_root / 'data' / 'eight_shaped_road.csv'
+
+# Debugging: Print paths to verify
+# print(f"Script directory: {script_dir}")
+# print(f"Project root: {project_root}")
+# print(f"Data path: {data_path}")
+
+# Check if the file exists
+if not data_path.exists():
+    raise FileNotFoundError(f"File not found: {data_path}")
+
+# way points from data folder eight_shaped_road.csv
+df = pd.read_csv(data_path)
+
+# Check if the file exists
+if not data_path.exists():
+    raise FileNotFoundError(f"File not found: {data_path}")
 
 # Parameter
 MAX_SPEED = 25.0 / 3.6  # maximum speed [m/s]
@@ -259,8 +294,6 @@ def generate_target_course(x, y):
 show_animation = True
 #show_animation = False
 
-# way points
-df = pd.read_csv('utils/eight_shaped_road.csv')
 wx = df['x'].values
 wy = df['y'].values
 
@@ -291,10 +324,6 @@ f_waypoints_s = []   # logitudnal Waypoints to track
 f_waypoints_d = [] # lateral Waypoints to track
 f_s_d = []  # logitudnal speed to track
 f_d_d = []     # lateral speed to track
-
-import matplotlib.pyplot as plt
-import imageio
-from io import BytesIO
 
 # Prepare lists to collect frames for the GIF
 frames = []
@@ -371,20 +400,34 @@ for i in range(20000):
 
 # Save the captured frames into a GIF file
 gif_filename = 'animation.gif'
-imageio.mimsave(gif_filename, frames, duration=0.1)  # 0.1 seconds per frame
+# Saving animation to GIF file at data folder 
+imageio.mimsave('/Users/rk/Documents/Github/Frennet_Frame/src/data/animation.gif', frames, duration=0.1)  # 0.1 seconds per frame
 
 # print("GIF created:", gif_filename)
 print("Finish")
-plt.figure(figsize=(8, 8)) 
-plt.plot(f_waypoints_s, f_waypoints_d, 'r')
-plt.show()
+
+#=======================================================================================================================
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+print(f"Script directory: {script_dir}")
+
+# Navigate up to the project root
+project_root = script_dir.parent
+print(f"Project root: {project_root}")
+
+# Build the path to the 'data' directory
+data_dir = project_root  / 'data'
+print(f"Data directory: {data_dir}")
 
 #extract data of the robot's trajectory f_waypoints_s, f_waypoints_d, f_s_d, f_d_d
 #export to .txt file
-data = {'f_waypoints_s': f_waypoints_s, 'f_waypoints_d': f_waypoints_d, 'f_s_d': f_s_d, 'f_d_d': f_d_d}
-df = pd.DataFrame(data)
+frenet_data = {'f_waypoints_s': f_waypoints_s, 'f_waypoints_d': f_waypoints_d, 'f_s_d': f_s_d, 'f_d_d': f_d_d}
+# extract frenet data to .txt file and .csv file at data folder
+df = pd.DataFrame(frenet_data)
 
-# Export to .txt file
-df.to_csv("frenet_data.txt", sep='\t', index=False)
-df.to_csv("frenet_frame_without_obstacle", index=False)
+# Save the data to a .txt file
+df.to_csv(data_dir / 'frenet_data.txt', index=False)
+# Save the data to a .csv file
+df.to_csv(data_dir / 'frenet_frame_without_obstacle.csv', index=False)
 
