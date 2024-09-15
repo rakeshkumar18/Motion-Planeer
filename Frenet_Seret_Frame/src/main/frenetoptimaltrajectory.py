@@ -25,6 +25,7 @@ project_root = script_dir.parent
 
 # Build the path to the 'data' directory and the CSV file
 data_path = project_root / 'data' / 'eight_shaped_road.csv'
+animation_data_path = project_root / 'data' / 'animation.gif'
 
 # Debugging: Print paths to verify
 # print(f"Script directory: {script_dir}")
@@ -54,7 +55,7 @@ MINT = 3.0  # min prediction time [m]
 TARGET_SPEED = 20.0 / 3.6  # target speed [m/s]
 D_T_S = 2.0 / 3.6  # target speed sampling length [m/s]
 N_S_SAMPLE = 1 # sampling number of target speed
-ROBOT_RADIUS = 2.0  # robot radius [m]
+ROBOT_RADIUS = 3.0  # robot radius [m]
 
 # cost weights
 
@@ -182,8 +183,8 @@ def calc_global_paths(fplist, csp):
                 break
             iyaw = csp.calc_yaw(fp.s[i])
             di = fp.d[i]
-            fx = ix + di * math.sin(iyaw)
-            fy = iy + di * math.cos(iyaw)
+            fx = ix + di * math.cos(iyaw + math.pi / 2.0)
+            fy = iy + di * math.sin(iyaw + math.pi / 2.0)
             fp.x.append(fx)
             fp.y.append(fy)
 
@@ -250,9 +251,6 @@ def check_paths(fplist, ob):
             continue
         elif any([abs(c) > MAX_CURVATURE for c in fplist[i].c]):  # Max curvature check
             continue
-        # if check_collision(fplist[i], ob):
-        #     continue
-
         okind.append(i)
 
     return [fplist[i] for i in okind]
@@ -298,7 +296,7 @@ wx = df['x'].values
 wy = df['y'].values
 
 ob = np.array([[21, 35]
-               ])
+               ,[40, 20]])
 tx, ty, tyaw, tc, csp = generate_target_course(wx,wy)
 
 # initial state
@@ -401,7 +399,7 @@ for i in range(20000):
 # Save the captured frames into a GIF file
 gif_filename = 'animation.gif'
 # Saving animation to GIF file at data folder 
-imageio.mimsave('/Users/rk/Documents/Github/Frennet_Frame/src/data/animation.gif', frames, duration=0.1)  # 0.1 seconds per frame
+imageio.mimsave(animation_data_path, frames, duration=0.1)  # 0.1 seconds per frame
 
 # print("GIF created:", gif_filename)
 print("Finish")
@@ -410,15 +408,15 @@ print("Finish")
 
 # Determine the directory of the current script
 script_dir = Path(__file__).resolve().parent
-print(f"Script directory: {script_dir}")
+# print(f"Script directory: {script_dir}")
 
 # Navigate up to the project root
 project_root = script_dir.parent
-print(f"Project root: {project_root}")
+# print(f"Project root: {project_root}")
 
 # Build the path to the 'data' directory
 data_dir = project_root  / 'data'
-print(f"Data directory: {data_dir}")
+# print(f"Data directory: {data_dir}")
 
 #extract data of the robot's trajectory f_waypoints_s, f_waypoints_d, f_s_d, f_d_d
 #export to .txt file
@@ -430,4 +428,3 @@ df = pd.DataFrame(frenet_data)
 df.to_csv(data_dir / 'frenet_data.txt', index=False)
 # Save the data to a .csv file
 df.to_csv(data_dir / 'frenet_frame_without_obstacle.csv', index=False)
-
