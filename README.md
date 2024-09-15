@@ -66,3 +66,13 @@ The `launch.sh` script automates the execution of three main Python scripts sequ
 #   tracking_simulation.py: 
     This script simulates the vehicle tracking the generated trajectory using a control algorithm
 ![Alt text](Frenet_Seret_Frame/src/data/simulation.gif)
+
+# references
+
+- [Optimal Trajectory Generation for Dynamic Street Scenarios in a Frenet Frame]
+(https://www.researchgate.net/profile/Moritz_Werling/publication/224156269_Optimal_Trajectory_Generation_for_Dynamic_Street_Scenarios_in_a_Frenet_Frame/links/54f749df0cf210398e9277af.pdf)
+
+- [Optimal trajectory generation for dynamic street scenarios in a Frenet Frame]
+(https://www.youtube.com/watch?v=Cj6tAQe7UCY)
+
+- https://fjp.at/posts/optimal-frenet/
