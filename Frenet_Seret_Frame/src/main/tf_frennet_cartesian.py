@@ -14,7 +14,7 @@ project_root = script_dir.parent
 
 # Build the path to the 'data' directory and the CSV file
 data_path_cart = project_root / 'data' / 'eight_shaped_road.csv'
-data_path_frenet = project_root / 'data' / 'frenet_frame_without_obstacle.csv'
+data_path_frenet = project_root / 'data' / 'frenet_frame_with_obstacle.csv'
 
 # Debugging: Print paths to verify
 # print(f"Script directory: {script_dir}")
@@ -99,8 +99,8 @@ class FrenetConverter:
         ref_yaw = self.spline.calc_yaw(s)
 
         # Apply lateral offset (d)
-        x = ref_x + d * np.sin(ref_yaw)
-        y = ref_y + d * np.cos(ref_yaw)
+        x = ref_x + d * np.cos(ref_yaw + np.pi / 2)
+        y = ref_y + d * np.sin(ref_yaw + np.pi / 2)
 
         return x, y
 
@@ -145,6 +145,25 @@ plt.plot(reference_x, reference_y, 'g--', label='Reference Path')
 reconverted_points = np.array(reconverted_points)
 plt.scatter(reconverted_points[:, 0], reconverted_points[:, 1], color='red', marker='x', label='Reconverted Cartesian Points')
 
+# Save reconverted Cartesian points to CSV
+
+# Determine the directory of the current script
+script_dir = Path(__file__).resolve().parent
+# print(f"Script directory: {script_dir}")
+
+# Navigate up to the project root
+project_root = script_dir.parent
+# print(f"Project root: {project_root}")
+
+# Build the path to the 'data' directory
+data_dir = project_root  / 'data'
+# print(f"Data directory: {data_dir}")
+frenet_data = {'x_ref': reconverted_points[:, 0], 'y_ref': reconverted_points[:, 1]}
+# extract frenet data to .txt file and .csv file at data folder
+df = pd.DataFrame(frenet_data)
+
+# Save the data to a .txt file
+df.to_csv(data_dir / 'tracking_frenet_data.csv', index=False)
 # Formatting the plot
 plt.title('Frenet to Cartesian')
 plt.xlabel('X')

@@ -12,7 +12,7 @@ class GlobalConfig:
     NU = 2                 # Number of control input ( accleration, steering angle)
     NX = 4                 # Number of state(x_pose, y_pose, v, yaw)
     max_iter = 15       # Maximum iteration of iLQR main "ruin_ilqr"
-    regu_init = 1000.0      
+    regu_init = 100.0      
     regu_true = 0.4
     regu_false = 7.0 
     max_regu = 10.0

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import imageio.v2 as imageio
 from config import GlobalConfig
 from ilqr_maths_main import run_ilqr
-import pdb
+import pandas as pd
 config_ = GlobalConfig()
 
 from pathlib import Path
@@ -22,7 +22,8 @@ script_dir = Path(__file__).resolve().parent
 project_root = script_dir.parent
 
 # Build the path to the 'data' directory and the CSV file
-data_path = project_root / 'data' / 'eight_shaped_road.csv'
+data_path = project_root / 'data' / 'tracking_frenet_data.csv'
+ref_data_path = project_root / 'data' / 'eight_shaped_road.csv'
 
 # Debugging: Print paths to verify
 # print(f"Script directory: {script_dir}")
@@ -35,12 +36,21 @@ if not data_path.exists():
 
 def sigmoid(z):
     return 1/(1+ np.exp(-z))
-import pandas as pd
+
 def main():
     # Load waypoints from CSV file
+    # Reconverted the frenet data to cartesian data to use as reference to track the vehicle
     df = pd.read_csv(data_path)
-    x = df['x'].values
-    y = df['y'].values
+    x = df['x_ref'].values
+    y = df['y_ref'].values
+
+     # Reference waypoint (eight shaped path) cartesian coordinates
+    df_ref = pd.read_csv(ref_data_path)
+    x_ref_cart = df_ref['x'].values
+    y_ref_cart = df_ref['y'].values
+    # Obstacle data
+    ob = np.array([[21, 35]
+               ,[40, 20]])
     
     N = 600  # Total number of waypoints from the cubic spline planner
     sp = CubicSpline2D(x, y)
@@ -61,7 +71,7 @@ def main():
     yaw_ref = np.array(ryaw)
     kappa = np.array(rk)
 
-    v_ref = np.round(np.sqrt(config_.a_lat / (abs(kappa) + 0.01)), 2)
+    v_ref = np.round(np.sqrt(config_.a_lat / (abs((kappa)) + 0.01)), 2)
     
     # Reference trajectory and control
     ref_traj = np.array([x_ref, y_ref, v_ref, yaw_ref]).T
@@ -86,8 +96,7 @@ def main():
 
     # Simulation loop
     fig, ax = plt.subplots(figsize=(10, 8))
-    plt.plot(x_ref, y_ref, color='gray', linewidth=5, label='Reference Trajectory')
-
+    
     frame_count = 0
 
     while t <= tf:
@@ -109,9 +118,11 @@ def main():
         y_traj.append(x_0[1])
 
         ax.clear()
-        ax.plot(x_ref, y_ref, color='gray', linewidth=5, label='Reference Trajectory')
-        ax.plot(x_[:, 0], x_[:, 1], 'r', linewidth=1, label='Receding Horizon Prediction')
-        ax.plot(x_[0, 0], x_[0, 1], 'o:g', markersize=8, label='Tracked Trajectory')
+        ax.plot(x_ref_cart, y_ref_cart, color='black', linewidth=8, label='Cartesian_trajectory')
+        ax.plot(x_ref, y_ref, color='gray', linewidth=2, label='Frenet Reference Trajectory')
+        ax.plot(x_[:, 0], x_[:, 1], 'r', linewidth=2, label='Receding Horizon Prediction')
+        ax.plot(x_[0, 0], x_[0, 1], 'o:g', markersize=6, label='Tracked Trajectory')
+        ax.plot(ob[:, 0], ob[:, 1], "oy", label='Obstacle')
         ax.set_title(f'Waypoints Tracking: Speed [km/h]: {x_0[2] * 3.6:.2f}', fontsize=14)
         ax.set_xlabel("x (m)")
         ax.set_ylabel("y (m)")
