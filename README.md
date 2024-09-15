@@ -57,12 +57,12 @@ The `launch.sh` script automates the execution of three main Python scripts sequ
 
 # frenetoptimaltrajectory.py: 
     This script generates the optimal trajectory in the Frenet frame based on the reference trajectory and obstacles in Cartesian coordinates.
-![Alt text](/Users/rk/Documents/Github/Motion-Planner/Frenet_Seret_Frame/src/data/animation.gif)
+![Alt text](Frenet_Seret_Frame/src/data/animation.gif)
 
 # tf_frennet_cartesian.py:
     This script converts the optimal Frenet trajectory back into Cartesian coordinates for tracking.
-![Alt text](/Users/rk/Documents/Github/Motion-Planner/Frenet_Seret_Frame/src/data/trajectories.png)
+![Alt text](Frenet_Seret_Frame/src/data/trajectories.png)
 
 #   tracking_simulation.py: 
     This script simulates the vehicle tracking the generated trajectory using a control algorithm
-![Alt text](/Users/rk/Documents/Github/Motion-Planner/Frenet_Seret_Frame/src/data/simulation.gif)
+![Alt text](Frenet_Seret_Frame/src/data/simulation.gif)
